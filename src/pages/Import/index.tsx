@@ -11,6 +11,7 @@ import { Container, Title, ImportFileContainer, Footer } from './styles';
 
 import alert from '../../assets/alert.svg';
 import api from '../../services/api';
+// import { UploadMessage } from '../../components/Upload/styles';
 
 interface FileProps {
   file: File;
@@ -20,22 +21,30 @@ interface FileProps {
 
 const Import: React.FC = () => {
   const [uploadedFiles, setUploadedFiles] = useState<FileProps[]>([]);
-  const history = useHistory();
+  // const history = useHistory();
 
   async function handleUpload(): Promise<void> {
-    // const data = new FormData();
-
-    // TODO
+    const data = new FormData();
 
     try {
-      // await api.post('/transactions/import', data);
+      uploadedFiles.forEach(file => {
+        data.append('file', file.file);
+      });
+      await api.post('/transactions/import', data);
     } catch (err) {
-      // console.log(err.response.error);
+      console.log(err.response.error);
     }
   }
 
   function submitFile(files: File[]): void {
-    // TODO
+    files.map((f): void => {
+      const fileProp: FileProps = {
+        name: f.name,
+        file: f,
+        readableSize: filesize(f.size),
+      };
+      setUploadedFiles([...uploadedFiles, fileProp]);
+    });
   }
 
   return (
@@ -46,7 +55,6 @@ const Import: React.FC = () => {
         <ImportFileContainer>
           <Upload onUpload={submitFile} />
           {!!uploadedFiles.length && <FileList files={uploadedFiles} />}
-
           <Footer>
             <p>
               <img src={alert} alt="Alert" />
